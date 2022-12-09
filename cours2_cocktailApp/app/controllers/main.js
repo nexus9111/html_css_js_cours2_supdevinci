@@ -88,11 +88,11 @@ button.addEventListener('click', createRandomCocktailCard);
 const workerButton = createElement('button', ['btn', 'btn-success'], 'Display all cocktails!');
 
 workerButton.addEventListener('click', () => {
-    const worker = new Worker();
+    const worker = new VueWorker();
     worker.createCocktailsCard();
 });
 
-class Cocktail {
+class CocktailManager {
     constructor(drink) {
         this.image = drink.strDrinkThumb;
         this.name = drink.strDrink;
@@ -124,13 +124,15 @@ class Cocktail {
     }
 }
 
-class Worker {
+class VueWorker {
     createCocktailsCard = async () => {
         try {
-            const cocktailInfo = await this.getCocktailsInfo();
+            // const cocktailInfo = await this.getCocktailsInfo();
+            const cocktailWorker = new CocktailApiWorker();
+            const cocktailInfo = await cocktailWorker.getCocktailsInfo();
             let cocktails = [];
             for (const drink of cocktailInfo) {
-                const cocktail = new Cocktail(drink);
+                const cocktail = new CocktailManager(drink);
                 cocktails.push(cocktail);
             }
             const cardContent = this.createCocktailCardContent(cocktails);
@@ -176,8 +178,11 @@ class Worker {
         }
         ingredientsList += `</ol>`
         return ingredientsList;
-    }
+    }  
+}
 
+
+class CocktailApiWorker {
     getCocktailsInfo = async () => {
         try {
             const response = await fetch('https://www.thecocktaildb.com/api/json/v1/1/search.php?s=');
@@ -188,5 +193,4 @@ class Worker {
             throw new Error("An error occured while fetching the cocktail data");
         }
     }
-}
-
+} 
